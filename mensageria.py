@@ -2,6 +2,7 @@ import os
 import serial
 import requests
 import time
+import sys
 from dotenv import load_dotenv
 
 # Carrega as chaves do arquivo .env
@@ -10,8 +11,8 @@ TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 URL_TELEGRAM = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
 
-# AJUSTE AQUI: Verifique no Gerenciador de Dispositivos se o Mega é COM3
-PORTA_COM = 'COM5' 
+# AJUSTE DINÂMICO: Detecta se está no Linux (WSL) ou Windows
+PORTA_COM = '/dev/ttyS7' if sys.platform.startswith('linux') else 'COM7' 
 
 def conectar_arduino():
     try:

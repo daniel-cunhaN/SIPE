@@ -1,77 +1,34 @@
-#include <SPI.h>
-#include <MFRC522.h>
-#include <LiquidCrystal.h>
+#include "HX711.h"
 
-// --- RFID Setup ---
-#define SS_PIN 53 // SDA pin on Arduino Mega
-#define RST_PIN 8 // Reset pin
-MFRC522 mfrc522(SS_PIN, RST_PIN);
+// Definição dos pinos de ligação
+const int LOADCELL_DOUT_PIN = 3;
+const int LOADCELL_SCK_PIN = 2;
 
-// --- LCD Setup ---
-// RS, E, D4, D5, D6, D7
-LiquidCrystal lcd(7, 6, 5, 4, 3, 2);
+HX711 scale;
+
+// Fator de calibração (Você precisará ajustar este valor)
+float fator_calibracao = 1000.0; 
 
 void setup() {
   Serial.begin(9600);
-  // Initialize SPI bus for RFID
-  SPI.begin();
-  // Initialize RFID reader
-  mfrc522.PCD_Init();
+  Serial.println("Inicializando a balança...");
+
+  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
+
+  // Define o fator de calibração
+  scale.set_scale(fator_calibracao);
   
-  // Initialize LCD
-  lcd.begin(16, 2);
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Sistema Pronto!");
-  lcd.setCursor(0, 1);
-  lcd.print("Aproxime a tag!");
-  
-  Serial.println("Esperando a tag...");
+  // Zera a balança (Tara)
+  scale.tare(); 
+
+  Serial.println("Balança zerada. Coloque um peso conhecido sobre ela.");
 }
 
 void loop() {
-  // Look for new RFID cards
-  if (!mfrc522.PICC_IsNewCardPresent()) {
-    return;
-  }
-
-  // Select one of the cards
-  if (!mfrc522.PICC_ReadCardSerial()) {
-    return;
-  }
-
-  // Clear LCD and show success message
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Tag Detectada!");
-
-  // Print the UID (Unique ID) on the second row
-  lcd.setCursor(0, 1);
-  lcd.print("ID: ");
-
-  String uidString = "";
-  for (byte i = 0; i < mfrc522.uid.size; i++) {
-    // Add a zero if the hex value is single digit
-    if (mfrc522.uid.uidByte[i] < 0x10) {
-      uidString += "0";
-    }
-    uidString += String(mfrc522.uid.uidByte[i], HEX);
-  }
-
-  // Convert to uppercase and print to LCD
-  uidString.toUpperCase();
-  lcd.print(uidString);
-  Serial.println("Card UID: " + uidString);
-
-  // Stop reading this specific card so we don't spam the screen
-  mfrc522.PICC_HaltA();
-
-  // Wait 2 seconds, then prompt to scan again
-  delay(2000);
-
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Sistema Pronto!");
-  lcd.setCursor(0, 1);
-  lcd.print("Aproxime a tag!");
+  Serial.print("Peso: ");
+  // Faz uma média de 10 leituras e mostra com 3 casas decimais
+  Serial.print(scale.get_units(10), 3); 
+  Serial.println(" kg");
+  
+  delay(1000);
 }
