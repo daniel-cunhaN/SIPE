@@ -6,14 +6,14 @@
 // --- Pin Definitions for Arduino Mega 2560 ---
 // RC522 RFID Module Pins (SPI)
 #define RST_PIN 49   // Reset pin
-#define SS_PIN 48  // SDA / SS pin (Standard for Mega)
+#define SS_PIN 48 // SDA / SS pin (Standard for Mega)
 // Note: Other SPI pins on the Mega 2560 are:
 // SCK  = 52
 // MOSI = 51
 // MISO = 50
 
 // SG90 Servo Motor Pin
-#define SERVO_PIN 9 // Can be any PWM-capable pin
+#define SERVO_PIN 5 // Can be any PWM-capable pin
 
 // --- Object Instantiation ---
 MFRC522 rfid(SS_PIN, RST_PIN); 
