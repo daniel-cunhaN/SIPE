@@ -12,7 +12,7 @@ CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 URL_TELEGRAM = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
 
 # AJUSTE DINÂMICO: Detecta se está no Linux (WSL) ou Windows
-PORTA_COM = '/dev/ttyS7' if sys.platform.startswith('linux') else 'COM7' 
+PORTA_COM = 'COM8'
 
 def conectar_arduino():
     try:
@@ -58,8 +58,15 @@ try:
             except Exception as e:
                 print(f"Erro de conexão: {e}")
 
+        elif "PESO:" in comando:
+            peso_str = comando.split("PESO:")[1].strip()
+            print(f"Monitoramento de Peso: {peso_str}")
+
+        elif "Variacao detectada:" in comando:
+             print(f"⚠️ {comando}")
+
         elif comando == "ENVIAR_PEDIDO":
-            print("Processando alerta para o Telegram...")
+            print("🚨 Alerta de Reposição! Enviando para o Telegram...")
             payload = {
                 "chat_id": CHAT_ID, 
                 "text": "🚨 ALERTA AUTOMÁTICO: O sensor detectou necessidade de reposição!"
@@ -73,6 +80,10 @@ try:
                     print(f"❌ Falha no Telegram. Status: {r.status_code}")
             except Exception as e:
                 print(f"Erro de conexão: {e}")
+        
+        elif comando:
+             # Para outras mensagens informativas do Arduino
+             print(f"Arduino: {comando}")
         
         time.sleep(0.1) # Evita uso excessivo da CPU[cite: 2]
 
